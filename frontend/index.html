@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIHC Canteen</title>
+</head>
+<body>
+    <div class="a">
+        <header class="a1" id="home">
+            <nav class="a2">
+                <a class="a3" href="#home">JIHC Canteen</a>
+
+                <div class="a4">
+                    <a href="#home">Home</a>
+                    <a href="#menu">Menu</a>
+                </div>
+
+                <a class="a5" href="#cart">Cart</a>
+            </nav>
+
+            <!-- Фото столовой добавим позже -->
+            <h1>Menu</h1>
+        </header>
+
+        <main>
+            <div class="b">
+                <h2>Your next tasty break</h2>
+
+                <form class="b1" role="search">
+                    <input
+                        type="search"
+                        id="search"
+                        placeholder="Search for food..."
+                        aria-label="Search for food"
+                    >
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+            <div class="c" id="menu">
+                <aside class="c1">
+                    <h3>Category</h3>
+
+                    <div class="c2">
+                        <button class="c3 c4" type="button">
+                            All Food
+                        </button>
+                        <button class="c3" type="button">
+                            Chocolate
+                        </button>
+                        <button class="c3" type="button">
+                            Juices
+                        </button>
+                        <button class="c3" type="button">
+                            Snacks
+                        </button>
+                        <button class="c3" type="button">
+                            Sandwiches & Toasts
+                        </button>
+                    </div>
+                </aside>
+
+                <div class="d" id="products">
+                    <!-- Временная карточка -->
+                    <article class="d1">
+                        <div class="d2">
+                            <span class="d3">Chocolate</span>
+                            <!-- Фото товара добавим позже -->
+                        </div>
+
+                        <div class="d5">
+                            <h3>Milk Chocolate</h3>
+                            <p>450 ₸</p>
+                        </div>
+
+                        <div class="d6">
+                            <button class="d7" type="button">
+                                Add to Cart
+                            </button>
+                            <button class="d8" type="button">
+                                Order Now
+                            </button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <section class="g" id="cart">
+                <h2>Your Cart</h2>
+
+                <div id="cart-items">
+                    <p>Your cart is empty.</p>
+                </div>
+
+                <p class="g1">
+                    Total: <span id="total">0</span> ₸
+                </p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
