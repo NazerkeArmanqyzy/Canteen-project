@@ -1,18 +1,28 @@
+// Адрес сервера Айдины.
+const apiUrl = "http://localhost:3000";
+
 const productsContainer = document.querySelector("#products");
+const productTemplate = document.querySelector("#product-template");
+
 const cartItems = document.querySelector("#cart-items");
 const cartCount = document.querySelector("#cart-count");
 const total = document.querySelector("#total");
+
 const search = document.querySelector("#search");
 const searchForm = document.querySelector(".b1");
 const categoryButtons = document.querySelectorAll(".c3");
 
+const orderForm = document.querySelector("#order-form");
+const customerName = document.querySelector("#customer-name");
+const studentGroup = document.querySelector("#student-group");
+const orderButton = document.querySelector("#order-button");
+const orderMessage = document.querySelector("#order-message");
+
 let products = [];
 let cart = [];
 let selectedCategory = "all";
-
-// Уточни у Айдины адрес сервера.
-// Здесь предполагается, что сервер работает на порту 3000.
-const productsUrl = "http://localhost:3000/products";
+let menuState = "loading";
+let isSubmitting = false;
 
 const categoryNames = {
     chocolate: "Chocolate",
@@ -28,19 +38,54 @@ const categoryEmoji = {
     sandwiches: "🥪"
 };
 
-// Используем твою карточку как шаблон:
-// классы и оформление остаются прежними.
-const cardTemplate = productsContainer
-    .querySelector(".d1")
-    .cloneNode(true);
-
 function formatPrice(price) {
-    return price.toLocaleString("ru-RU");
+    return price.toLocaleString("ru-RU", {
+        maximumFractionDigits: 2
+    });
 }
 
-// Показываем блюда с учётом поиска и категории.
+function createButton(text, label, action) {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.textContent = text;
+    button.setAttribute("aria-label", label);
+    button.addEventListener("click", action);
+
+    return button;
+}
+
+function showMenuMessage(text) {
+    const message = document.createElement("p");
+    message.textContent = text;
+    productsContainer.append(message);
+}
+
+// Отображение меню.
 function showProducts() {
     productsContainer.replaceChildren();
+
+    if (menuState === "loading") {
+        showMenuMessage("Loading menu...");
+        return;
+    }
+
+    if (menuState === "error") {
+        showMenuMessage(
+            "Could not load menu. Check the server and try again."
+        );
+
+        const retry = createButton(
+            "Try again",
+            "Load menu again",
+            loadProducts
+        );
+
+        retry.className = "d9";
+        retry.disabled = isSubmitting;
+        productsContainer.append(retry);
+        return;
+    }
 
     const query = search.value.trim().toLowerCase();
 
@@ -56,14 +101,14 @@ function showProducts() {
     });
 
     if (filteredProducts.length === 0) {
-        const message = document.createElement("p");
-        message.textContent = "No food found.";
-        productsContainer.append(message);
+        showMenuMessage("No food found.");
         return;
     }
 
     filteredProducts.forEach(function (product) {
-        const card = cardTemplate.cloneNode(true);
+        const card = productTemplate.content
+            .querySelector(".d1")
+            .cloneNode(true);
 
         card.dataset.category = product.category;
 
@@ -78,11 +123,19 @@ function showProducts() {
         card.querySelector(".d5 p").textContent =
             formatPrice(product.price) + " ₸";
 
-        card.querySelector(".d7").addEventListener("click", function () {
+        const addButton = card.querySelector(".d7");
+        const orderNowButton = card.querySelector(".d8");
+
+        addButton.disabled = isSubmitting;
+        orderNowButton.disabled = isSubmitting;
+
+        addButton.addEventListener("click", function () {
             addToCart(product.id);
         });
 
-        card.querySelector(".d8").addEventListener("click", function () {
+        orderNowButton.addEventListener("click", function () {
+            if (isSubmitting) return;
+
             addToCart(product.id);
 
             document.querySelector("#cart").scrollIntoView({
@@ -94,13 +147,104 @@ function showProducts() {
     });
 }
 
-// Добавление блюда в корзину.
+// Загрузка блюд из PostgreSQL через сервер.
+async function loadProducts() {
+    if (isSubmitting) return;
+
+    menuState = "loading";
+    productsContainer.setAttribute("aria-busy", "true");
+    showProducts();
+
+    try {
+        const response = await fetch(apiUrl + "/products");
+
+        if (!response.ok) {
+            throw new Error("Menu request failed: " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            throw new Error("Expected an array of products.");
+        }
+
+        const ids = new Set();
+
+        products = data.map(function (product) {
+            if (!product || typeof product !== "object") {
+                throw new Error("Invalid product data.");
+            }
+
+            const id = Number(product.id);
+            const price = Number(product.price);
+
+            if (
+                !Number.isInteger(id) ||
+                id <= 0 ||
+                id > 2147483647 ||
+                typeof product.name !== "string" ||
+                !product.name.trim() ||
+                typeof product.category !== "string" ||
+                !product.category.trim() ||
+                product.price == null ||
+                product.price === "" ||
+                !Number.isFinite(price) ||
+                price < 0
+            ) {
+                throw new Error("Invalid product data.");
+            }
+
+            if (ids.has(id)) {
+                throw new Error("Duplicate product ID.");
+            }
+
+            ids.add(id);
+
+            return {
+                id: id,
+                name: product.name.trim(),
+                price: price,
+                category: product.category.toLowerCase().trim()
+            };
+        });
+
+        document.querySelector(
+            '[data-category="all"] span'
+        ).textContent = products.length;
+
+        menuState = "ready";
+    } catch (error) {
+        products = [];
+        menuState = "error";
+
+        document.querySelector(
+            '[data-category="all"] span'
+        ).textContent = "0";
+
+        console.error("Menu error:", error);
+    } finally {
+        productsContainer.setAttribute("aria-busy", "false");
+        showProducts();
+    }
+}
+
+// Добавление в корзину.
 function addToCart(productId) {
+    if (isSubmitting) return;
+
     const existingItem = cart.find(function (item) {
         return item.id === productId;
     });
 
     if (existingItem) {
+        if (existingItem.quantity >= 100) {
+            showOrderMessage(
+                "Maximum quantity per product is 100.",
+                "error"
+            );
+            return;
+        }
+
         existingItem.quantity += 1;
     } else {
         const product = products.find(function (item) {
@@ -117,17 +261,27 @@ function addToCart(productId) {
         });
     }
 
+    showOrderMessage("", "");
     showCart();
 }
 
 // Изменение количества.
-// Если количество становится нулём, убираем блюдо.
 function changeQuantity(productId, change) {
+    if (isSubmitting) return;
+
     const item = cart.find(function (product) {
         return product.id === productId;
     });
 
     if (!item) return;
+
+    if (item.quantity + change > 100) {
+        showOrderMessage(
+            "Maximum quantity per product is 100.",
+            "error"
+        );
+        return;
+    }
 
     item.quantity += change;
 
@@ -137,33 +291,27 @@ function changeQuantity(productId, change) {
         });
     }
 
+    showOrderMessage("", "");
     showCart();
 }
 
+// Удаление блюда.
 function removeFromCart(productId) {
+    if (isSubmitting) return;
+
     cart = cart.filter(function (item) {
         return item.id !== productId;
     });
 
+    showOrderMessage("", "");
     showCart();
 }
 
-function createButton(text, label, action) {
-    const button = document.createElement("button");
-
-    button.type = "button";
-    button.textContent = text;
-    button.setAttribute("aria-label", label);
-    button.addEventListener("click", action);
-
-    return button;
-}
-
-// Обновление корзины, суммы и счётчика.
+// Отображение корзины.
 function showCart() {
     cartItems.replaceChildren();
 
-    let totalPrice = 0;
+    let totalCents = 0;
     let totalQuantity = 0;
 
     if (cart.length === 0) {
@@ -216,23 +364,30 @@ function showCart() {
                 removeFromCart(item.id);
             }
         );
+
+        minus.disabled = isSubmitting;
+        plus.disabled = isSubmitting;
+        remove.disabled = isSubmitting;
         remove.className = "g6";
 
         controls.append(minus, quantity, plus, remove);
 
+        const itemCents =
+            Math.round(item.price * 100) * item.quantity;
+
         const subtotal = document.createElement("strong");
         subtotal.className = "g5";
         subtotal.textContent =
-            formatPrice(item.price * item.quantity) + " ₸";
+            formatPrice(itemCents / 100) + " ₸";
 
         row.append(info, controls, subtotal);
         cartItems.append(row);
 
-        totalPrice += item.price * item.quantity;
+        totalCents += itemCents;
         totalQuantity += item.quantity;
     });
 
-    total.textContent = formatPrice(totalPrice);
+    total.textContent = formatPrice(totalCents / 100);
     cartCount.textContent = totalQuantity;
 }
 
@@ -244,100 +399,139 @@ searchForm.addEventListener("submit", function (event) {
 
 search.addEventListener("input", showProducts);
 
-// Переключение категорий.
+// Категории.
 categoryButtons.forEach(function (button) {
     button.addEventListener("click", function () {
-        categoryButtons.forEach(function (item) {
-            item.classList.remove("c4");
-        });
-
-        button.classList.add("c4");
         selectedCategory = button.dataset.category;
+
+        categoryButtons.forEach(function (item) {
+            item.classList.toggle("c4", item === button);
+        });
 
         showProducts();
     });
 });
 
-// Загрузка меню с сервера.
-async function loadProducts() {
-    productsContainer.replaceChildren();
+// Сообщение о заказе.
+function showOrderMessage(text, type) {
+    orderMessage.textContent = text;
+    orderMessage.className = "i4 " + type;
+}
 
-    const message = document.createElement("p");
-    message.textContent = "Loading menu...";
-    productsContainer.append(message);
+// Блокировка формы и корзины во время отправки.
+function setOrderBusy(busy) {
+    orderButton.disabled = busy;
+    customerName.disabled = busy;
+    studentGroup.disabled = busy;
+
+    orderButton.textContent = busy
+        ? "Sending..."
+        : "Place Order";
+
+    orderForm.setAttribute("aria-busy", String(busy));
+
+    showProducts();
+    showCart();
+}
+
+// Отправка заказа.
+orderForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (isSubmitting) return;
+
+    if (cart.length === 0) {
+        showOrderMessage(
+            "Add food to your cart first.",
+            "error"
+        );
+        return;
+    }
+
+    const name = customerName.value.trim();
+    const group = studentGroup.value.trim();
+
+    if (!name || !group) {
+        showOrderMessage(
+            "Enter your name and group.",
+            "error"
+        );
+        return;
+    }
+
+    if (name.length > 100 || group.length > 50) {
+        showOrderMessage(
+            "Name or group is too long.",
+            "error"
+        );
+        return;
+    }
+
+    const items = cart.map(function (item) {
+        return {
+            product_id: item.id,
+            quantity: item.quantity
+        };
+    });
+
+    isSubmitting = true;
+    showOrderMessage("", "");
+    setOrderBusy(true);
 
     try {
-        const response = await fetch(productsUrl);
+        const response = await fetch(apiUrl + "/orders", {
+            method: "POST",
 
-        if (!response.ok) {
-            throw new Error("Menu request failed: " + response.status);
-        }
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-            throw new Error("Expected an array of products");
-        }
-
-        const ids = new Set();
-
-        products = data.map(function (product) {
-            const price = Number(product.price);
-
-            if (
-                product.id == null ||
-                typeof product.name !== "string" ||
-                typeof product.category !== "string" ||
-                product.price == null ||
-                product.price === "" ||
-                !Number.isFinite(price) ||
-                price < 0
-            ) {
-                throw new Error("Invalid product data");
-            }
-
-            const id = String(product.id);
-
-            if (ids.has(id)) {
-                throw new Error("Duplicate product ID");
-            }
-
-            ids.add(id);
-
-            return {
-                id: id,
-                name: product.name,
-                price: price,
-                category: product.category.toLowerCase().trim()
-            };
+            body: JSON.stringify({
+                name: name,
+                group: group,
+                items: items
+            })
         });
 
-        const allFoodCount = document.querySelector(
-            '[data-category="all"] span'
+        const data = await response.json().catch(function () {
+            return null;
+        });
+
+        if (!response.ok) {
+            const message =
+                data && typeof data.message === "string"
+                    ? data.message
+                    : "Could not place your order.";
+
+            showOrderMessage(message, "error");
+            return;
+        }
+
+        // Успешный ответ сервера — очищаем корзину.
+        cart = [];
+        orderForm.reset();
+
+        const orderId = data?.order?.id;
+
+        showOrderMessage(
+            orderId != null
+                ? "Order #" + orderId + " placed successfully!"
+                : "Your order was placed successfully!",
+            "success"
         );
-
-        allFoodCount.textContent = products.length;
-
-        showProducts();
     } catch (error) {
-        products = [];
-        productsContainer.replaceChildren();
+        console.error("Order error:", error);
 
-        const errorMessage = document.createElement("p");
-        errorMessage.textContent =
-            "Could not load menu. Check the server and try again.";
-
-        const retry = createButton(
-            "Try again",
-            "Load menu again",
-            loadProducts
+        showOrderMessage(
+            "Could not confirm your order. Your cart has been kept. " +
+            "Check with the canteen before submitting again.",
+            "error"
         );
-        retry.className = "d7";
-
-        productsContainer.append(errorMessage, retry);
-        console.error(error);
+    } finally {
+        isSubmitting = false;
+        setOrderBusy(false);
     }
-}
+});
 
 showCart();
 loadProducts();
