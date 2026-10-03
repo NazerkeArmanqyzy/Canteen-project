@@ -44,12 +44,39 @@ app.get("/products", async function (req, res) {
     }
 });
 
-// День 3: сохранение тестового заказа
+// День 4: проверка заказа, расчёт total и transaction
 app.post("/orders", async function (req, res) {
+    const client = await pool.connect();
+
     try {
         const { name, group, items } = req.body;
 
-        const orderResult = await pool.query(
+        // Проверка данных
+        if (!name || !group || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({
+                message: "Name, group and items are required."
+            });
+        }
+
+        for (const item of items) {
+            if (
+                !Number.isInteger(item.product_id) ||
+                !Number.isInteger(item.quantity) ||
+                item.quantity <= 0
+            ) {
+                return res.status(400).json({
+                    message: "Invalid product_id or quantity."
+                });
+            }
+        }
+
+        // Начинаем transaction
+        await client.query("BEGIN");
+
+        let total = 0;
+
+        // Создаём order
+        const orderResult = await client.query(
             `
                 INSERT INTO orders (
                     customer_name,
@@ -63,15 +90,22 @@ app.post("/orders", async function (req, res) {
 
         const order = orderResult.rows[0];
 
+        // Создаём order items
         for (const item of items) {
-            const productResult = await pool.query(
+            const productResult = await client.query(
                 "SELECT price FROM products WHERE id = $1",
                 [item.product_id]
             );
 
-            const price = productResult.rows[0].price;
+            if (productResult.rows.length === 0) {
+                throw new Error(`Product ${item.product_id} not found.`);
+            }
 
-            await pool.query(
+            const price = Number(productResult.rows[0].price);
+
+            total += price * item.quantity;
+
+            await client.query(
                 `
                     INSERT INTO order_items (
                         order_id,
@@ -90,16 +124,28 @@ app.post("/orders", async function (req, res) {
             );
         }
 
+        // Всё успешно — сохраняем transaction
+        await client.query("COMMIT");
+
         res.status(201).json({
             message: "Order created.",
-            order: order
+            order: order,
+            total: total
         });
+
     } catch (error) {
+        // Если произошла ошибка — отменяем всё
+        await client.query("ROLLBACK");
+
         console.error(error.message);
 
         res.status(500).json({
             message: "Could not save order."
         });
+
+    } finally {
+        // Возвращаем connection обратно в pool
+        client.release();
     }
 });
 
