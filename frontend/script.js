@@ -84,6 +84,7 @@ function showProducts() {
         retry.className = "d9";
         retry.disabled = isSubmitting;
         productsContainer.append(retry);
+
         return;
     }
 
@@ -159,7 +160,9 @@ async function loadProducts() {
         const response = await fetch(apiUrl + "/products");
 
         if (!response.ok) {
-            throw new Error("Menu request failed: " + response.status);
+            throw new Error(
+                "Menu request failed: " + response.status
+            );
         }
 
         const data = await response.json();
@@ -331,7 +334,8 @@ function showCart() {
         name.textContent = item.name;
 
         const price = document.createElement("p");
-        price.textContent = formatPrice(item.price) + " ₸ each";
+        price.textContent =
+            formatPrice(item.price) + " ₸ each";
 
         info.append(name, price);
 
@@ -368,27 +372,44 @@ function showCart() {
         minus.disabled = isSubmitting;
         plus.disabled = isSubmitting;
         remove.disabled = isSubmitting;
+
         remove.className = "g6";
 
-        controls.append(minus, quantity, plus, remove);
+        controls.append(
+            minus,
+            quantity,
+            plus,
+            remove
+        );
 
         const itemCents =
-            Math.round(item.price * 100) * item.quantity;
+            Math.round(item.price * 100) *
+            item.quantity;
 
         const subtotal = document.createElement("strong");
         subtotal.className = "g5";
         subtotal.textContent =
             formatPrice(itemCents / 100) + " ₸";
 
-        row.append(info, controls, subtotal);
+        row.append(
+            info,
+            controls,
+            subtotal
+        );
+
         cartItems.append(row);
 
         totalCents += itemCents;
         totalQuantity += item.quantity;
     });
 
-    total.textContent = formatPrice(totalCents / 100);
+    total.textContent =
+        formatPrice(totalCents / 100);
+
     cartCount.textContent = totalQuantity;
+
+    orderButton.disabled =
+        cart.length === 0 || isSubmitting;
 }
 
 // Поиск.
@@ -405,7 +426,10 @@ categoryButtons.forEach(function (button) {
         selectedCategory = button.dataset.category;
 
         categoryButtons.forEach(function (item) {
-            item.classList.toggle("c4", item === button);
+            item.classList.toggle(
+                "c4",
+                item === button
+            );
         });
 
         showProducts();
@@ -420,7 +444,9 @@ function showOrderMessage(text, type) {
 
 // Блокировка формы и корзины во время отправки.
 function setOrderBusy(busy) {
-    orderButton.disabled = busy;
+    orderButton.disabled =
+        busy || cart.length === 0;
+
     customerName.disabled = busy;
     studentGroup.disabled = busy;
 
@@ -428,110 +454,139 @@ function setOrderBusy(busy) {
         ? "Sending..."
         : "Place Order";
 
-    orderForm.setAttribute("aria-busy", String(busy));
+    orderForm.setAttribute(
+        "aria-busy",
+        String(busy)
+    );
 
     showProducts();
     showCart();
 }
 
 // Отправка заказа.
-orderForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
+orderForm.addEventListener(
+    "submit",
+    async function (event) {
+        event.preventDefault();
 
-    if (isSubmitting) return;
+        if (isSubmitting) return;
 
-    if (cart.length === 0) {
-        showOrderMessage(
-            "Add food to your cart first.",
-            "error"
-        );
-        return;
-    }
-
-    const name = customerName.value.trim();
-    const group = studentGroup.value.trim();
-
-    if (!name || !group) {
-        showOrderMessage(
-            "Enter your name and group.",
-            "error"
-        );
-        return;
-    }
-
-    if (name.length > 100 || group.length > 50) {
-        showOrderMessage(
-            "Name or group is too long.",
-            "error"
-        );
-        return;
-    }
-
-    const items = cart.map(function (item) {
-        return {
-            product_id: item.id,
-            quantity: item.quantity
-        };
-    });
-
-    isSubmitting = true;
-    showOrderMessage("", "");
-    setOrderBusy(true);
-
-    try {
-        const response = await fetch(apiUrl + "/orders", {
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                name: name,
-                group: group,
-                items: items
-            })
-        });
-
-        const data = await response.json().catch(function () {
-            return null;
-        });
-
-        if (!response.ok) {
-            const message =
-                data && typeof data.message === "string"
-                    ? data.message
-                    : "Could not place your order.";
-
-            showOrderMessage(message, "error");
+        if (cart.length === 0) {
+            showOrderMessage(
+                "Add food to your cart first.",
+                "error"
+            );
             return;
         }
 
-        // Успешный ответ сервера — очищаем корзину.
-        cart = [];
-        orderForm.reset();
+        const name = customerName.value.trim();
+        const group = studentGroup.value.trim();
 
-        const orderId = data?.order?.id;
+        if (!name || !group) {
+            showOrderMessage(
+                "Enter your name and group.",
+                "error"
+            );
+            return;
+        }
 
-        showOrderMessage(
-            orderId != null
-                ? "Order #" + orderId + " placed successfully!"
-                : "Your order was placed successfully!",
-            "success"
-        );
-    } catch (error) {
-        console.error("Order error:", error);
+        if (
+            name.length > 100 ||
+            group.length > 50
+        ) {
+            showOrderMessage(
+                "Name or group is too long.",
+                "error"
+            );
+            return;
+        }
 
-        showOrderMessage(
-            "Could not confirm your order. Your cart has been kept. " +
-            "Check with the canteen before submitting again.",
-            "error"
-        );
-    } finally {
-        isSubmitting = false;
-        setOrderBusy(false);
+        const items = cart.map(function (item) {
+            return {
+                product_id: item.id,
+                quantity: item.quantity
+            };
+        });
+
+        isSubmitting = true;
+
+        showOrderMessage("", "");
+        setOrderBusy(true);
+
+        try {
+            const response = await fetch(
+                apiUrl + "/orders",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name: name,
+                        group: group,
+                        items: items
+                    })
+                }
+            );
+
+            const data =
+                await response.json().catch(
+                    function () {
+                        return null;
+                    }
+                );
+
+            if (!response.ok) {
+                const message =
+                    data &&
+                    typeof data.message ===
+                        "string"
+                        ? data.message
+                        : "Could not place your order.";
+
+                showOrderMessage(
+                    message,
+                    "error"
+                );
+
+                return;
+            }
+
+            // Успешный ответ сервера — очищаем корзину.
+            cart = [];
+            orderForm.reset();
+
+            const orderId =
+                data?.order?.id;
+
+            showOrderMessage(
+                orderId != null
+                    ? "Order #" +
+                          orderId +
+                          " placed successfully!"
+                    : "Your order was placed successfully!",
+                "success"
+            );
+        } catch (error) {
+            console.error(
+                "Order error:",
+                error
+            );
+
+            showOrderMessage(
+                "Could not confirm your order. Your cart has been kept. " +
+                    "Check with the canteen before submitting again.",
+                "error"
+            );
+        } finally {
+            isSubmitting = false;
+            setOrderBusy(false);
+        }
     }
-});
+);
 
 showCart();
 loadProducts();
