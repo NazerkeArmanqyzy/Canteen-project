@@ -24,6 +24,8 @@ let selectedCategory = "all";
 let menuState = "loading";
 let isSubmitting = false;
 
+const cartStorageKey = "jihc-canteen-cart";
+
 const categoryNames = {
     chocolate: "Chocolate",
     juices: "Juices",
@@ -42,6 +44,112 @@ function formatPrice(price) {
     return price.toLocaleString("ru-RU", {
         maximumFractionDigits: 2
     });
+}
+
+// Сохранение корзины.
+function saveCart() {
+    try {
+        localStorage.setItem(
+            cartStorageKey,
+            JSON.stringify(cart)
+        );
+    } catch (error) {
+        console.error("Could not save cart:", error);
+    }
+}
+
+// Восстановление корзины после обновления страницы.
+function restoreCart() {
+    try {
+        const savedCart = localStorage.getItem(cartStorageKey);
+
+        if (!savedCart) return;
+
+        const data = JSON.parse(savedCart);
+
+        if (!Array.isArray(data)) {
+            throw new Error("Invalid saved cart.");
+        }
+
+        const ids = new Set();
+
+        cart = data
+            .filter(function (item) {
+                if (!item || typeof item !== "object") {
+                    return false;
+                }
+
+                const isValid =
+                    Number.isInteger(item.id) &&
+                    item.id > 0 &&
+                    item.id <= 2147483647 &&
+                    typeof item.name === "string" &&
+                    item.name.trim().length > 0 &&
+                    typeof item.price === "number" &&
+                    Number.isFinite(item.price) &&
+                    item.price >= 0 &&
+                    Number.isInteger(item.quantity) &&
+                    item.quantity >= 1 &&
+                    item.quantity <= 100;
+
+                if (!isValid || ids.has(item.id)) {
+                    return false;
+                }
+
+                ids.add(item.id);
+                return true;
+            })
+            .map(function (item) {
+                return {
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                };
+            });
+    } catch (error) {
+        cart = [];
+        console.error("Could not restore cart:", error);
+    }
+}
+
+// Обновление сохранённой корзины по актуальному меню.
+function syncCartWithProducts() {
+    let hasChanges = false;
+
+    cart = cart.flatMap(function (item) {
+        const product = products.find(function (product) {
+            return product.id === item.id;
+        });
+
+        if (!product) {
+            hasChanges = true;
+            return [];
+        }
+
+        if (
+            item.name !== product.name ||
+            item.price !== product.price
+        ) {
+            hasChanges = true;
+        }
+
+        return [{
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: item.quantity
+        }];
+    });
+
+    showCart();
+
+    if (hasChanges) {
+        showOrderMessage(
+            "Your cart was updated to match the current menu.",
+            "success"
+        );
+    }
 }
 
 function createButton(text, label, action) {
@@ -147,19 +255,24 @@ function showProducts() {
     });
 }
 
-// Загрузка блюд из PostgreSQL через сервер.
+// Загрузка меню с сервера.
 async function loadProducts() {
-    if (isSubmitting) return;
+    if (isSubmitting || menuState === "loading-request") return;
 
-    menuState = "loading";
+    menuState = "loading-request";
     productsContainer.setAttribute("aria-busy", "true");
-    showProducts();
+    orderButton.disabled = true;
+
+    productsContainer.replaceChildren();
+    showMenuMessage("Loading menu...");
 
     try {
         const response = await fetch(apiUrl + "/products");
 
         if (!response.ok) {
-            throw new Error("Menu request failed: " + response.status);
+            throw new Error(
+                "Menu request failed: " + response.status
+            );
         }
 
         const data = await response.json();
@@ -186,8 +299,14 @@ async function loadProducts() {
                 !product.name.trim() ||
                 typeof product.category !== "string" ||
                 !product.category.trim() ||
-                product.price == null ||
-                product.price === "" ||
+                (
+                    typeof product.price !== "string" &&
+                    typeof product.price !== "number"
+                ) ||
+                (
+                    typeof product.price === "string" &&
+                    !product.price.trim()
+                ) ||
                 !Number.isFinite(price) ||
                 price < 0
             ) {
@@ -213,6 +332,7 @@ async function loadProducts() {
         ).textContent = products.length;
 
         menuState = "ready";
+        syncCartWithProducts();
     } catch (error) {
         products = [];
         menuState = "error";
@@ -221,16 +341,20 @@ async function loadProducts() {
             '[data-category="all"] span'
         ).textContent = "0";
 
+        // При ошибке загрузки сохранённую корзину не удаляем.
         console.error("Menu error:", error);
     } finally {
         productsContainer.setAttribute("aria-busy", "false");
+        orderButton.disabled =
+            isSubmitting || menuState !== "ready";
+
         showProducts();
     }
 }
 
-// Добавление в корзину.
+// Добавление блюда.
 function addToCart(productId) {
-    if (isSubmitting) return;
+    if (isSubmitting || menuState !== "ready") return;
 
     const existingItem = cart.find(function (item) {
         return item.id === productId;
@@ -307,7 +431,7 @@ function removeFromCart(productId) {
     showCart();
 }
 
-// Отображение корзины.
+// Отображение и сохранение корзины.
 function showCart() {
     cartItems.replaceChildren();
 
@@ -331,7 +455,8 @@ function showCart() {
         name.textContent = item.name;
 
         const price = document.createElement("p");
-        price.textContent = formatPrice(item.price) + " ₸ each";
+        price.textContent =
+            formatPrice(item.price) + " ₸ each";
 
         info.append(name, price);
 
@@ -389,6 +514,8 @@ function showCart() {
 
     total.textContent = formatPrice(totalCents / 100);
     cartCount.textContent = totalQuantity;
+
+    saveCart();
 }
 
 // Поиск.
@@ -412,15 +539,15 @@ categoryButtons.forEach(function (button) {
     });
 });
 
-// Сообщение о заказе.
+// Сообщения формы.
 function showOrderMessage(text, type) {
     orderMessage.textContent = text;
     orderMessage.className = "i4 " + type;
 }
 
-// Блокировка формы и корзины во время отправки.
+// Блокировка во время отправки.
 function setOrderBusy(busy) {
-    orderButton.disabled = busy;
+    orderButton.disabled = busy || menuState !== "ready";
     customerName.disabled = busy;
     studentGroup.disabled = busy;
 
@@ -439,6 +566,14 @@ orderForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     if (isSubmitting) return;
+
+    if (menuState !== "ready") {
+        showOrderMessage(
+            "Wait for the menu to load before ordering.",
+            "error"
+        );
+        return;
+    }
 
     if (cart.length === 0) {
         showOrderMessage(
@@ -507,8 +642,9 @@ orderForm.addEventListener("submit", async function (event) {
             return;
         }
 
-        // Успешный ответ сервера — очищаем корзину.
+        // После успешного заказа очищаем и сохранённую корзину.
         cart = [];
+        showCart();
         orderForm.reset();
 
         const orderId = data?.order?.id;
@@ -533,5 +669,7 @@ orderForm.addEventListener("submit", async function (event) {
     }
 });
 
+// Начальный запуск.
+restoreCart();
 showCart();
 loadProducts();
