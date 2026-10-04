@@ -46,13 +46,21 @@ app.get("/products", async function (req, res) {
 
 // День 4: проверка заказа, расчёт total и transaction
 app.post("/orders", async function (req, res) {
-    const client = await pool.connect();
+    let client;
+    let transactionStarted = false;
 
     try {
-        const { name, group, items } = req.body;
+        const { name, group, items } = req.body || {};
 
         // Проверка данных
-        if (!name || !group || !Array.isArray(items) || items.length === 0) {
+        if (
+            typeof name !== "string" ||
+            !name.trim() ||
+            typeof group !== "string" ||
+            !group.trim() ||
+            !Array.isArray(items) ||
+            items.length === 0
+        ) {
             return res.status(400).json({
                 message: "Name, group and items are required."
             });
@@ -60,6 +68,7 @@ app.post("/orders", async function (req, res) {
 
         for (const item of items) {
             if (
+                !item ||
                 !Number.isInteger(item.product_id) ||
                 !Number.isInteger(item.quantity) ||
                 item.quantity <= 0
@@ -70,8 +79,11 @@ app.post("/orders", async function (req, res) {
             }
         }
 
+        client = await pool.connect();
+
         // Начинаем transaction
         await client.query("BEGIN");
+        transactionStarted = true;
 
         let total = 0;
 
@@ -85,7 +97,7 @@ app.post("/orders", async function (req, res) {
                 VALUES ($1, $2)
                 RETURNING *
             `,
-            [name, group]
+            [name.trim(), group.trim()]
         );
 
         const order = orderResult.rows[0];
@@ -126,6 +138,7 @@ app.post("/orders", async function (req, res) {
 
         // Всё успешно — сохраняем transaction
         await client.query("COMMIT");
+        transactionStarted = false;
 
         res.status(201).json({
             message: "Order created.",
@@ -135,17 +148,23 @@ app.post("/orders", async function (req, res) {
 
     } catch (error) {
         // Если произошла ошибка — отменяем всё
-        await client.query("ROLLBACK");
+        if (transactionStarted) {
+            await client.query("ROLLBACK");
+        }
 
         console.error(error.message);
 
-        res.status(500).json({
+        const status = error.message.includes("not found") ? 400 : 500;
+
+        res.status(status).json({
             message: "Could not save order."
         });
 
     } finally {
         // Возвращаем connection обратно в pool
-        client.release();
+        if (client) {
+            client.release();
+        }
     }
 });
 
