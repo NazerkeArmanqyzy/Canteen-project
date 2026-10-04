@@ -356,6 +356,19 @@
                     <div id="cart-items" aria-live="polite">
                         <p>Your cart is empty.</p>
                     </div>
+
+                    <form id="order-form" class="g7">
+                        <label>
+                            Your name
+                            <input id="customer-name" name="name" required maxlength="100">
+                        </label>
+                        <label>
+                            Group
+                            <input id="student-group" name="group" required maxlength="50">
+                        </label>
+                        <button id="order-button" type="submit">Place order</button>
+                        <p id="order-message" role="status" aria-live="polite"></p>
+                    </form>
                 </div>
 
                 <p class="g1">

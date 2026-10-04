@@ -5,6 +5,11 @@ const total = document.querySelector("#total");
 const search = document.querySelector("#search");
 const searchForm = document.querySelector(".b1");
 const categoryButtons = document.querySelectorAll(".c3");
+const orderForm = document.querySelector("#order-form");
+const customerName = document.querySelector("#customer-name");
+const studentGroup = document.querySelector("#student-group");
+const orderButton = document.querySelector("#order-button");
+const orderMessage = document.querySelector("#order-message");
 
 let products = [];
 let cart = [];
@@ -13,6 +18,7 @@ let selectedCategory = "all";
 // Уточни у Айдины адрес сервера.
 // Здесь предполагается, что сервер работает на порту 3000.
 const productsUrl = "http://localhost:3000/products";
+const ordersUrl = "http://localhost:3000/orders";
 
 const categoryNames = {
     chocolate: "Chocolate",
@@ -234,6 +240,7 @@ function showCart() {
 
     total.textContent = formatPrice(totalPrice);
     cartCount.textContent = totalQuantity;
+    orderButton.disabled = cart.length === 0;
 }
 
 // Поиск.
@@ -243,6 +250,66 @@ searchForm.addEventListener("submit", function (event) {
 });
 
 search.addEventListener("input", showProducts);
+
+// Оформление заказа через API сервера.
+orderForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (cart.length === 0) {
+        orderMessage.textContent = "Add at least one item to your cart.";
+        return;
+    }
+
+    const name = customerName.value.trim();
+    const group = studentGroup.value.trim();
+
+    if (!name || !group) {
+        orderMessage.textContent = "Enter your name and group.";
+        return;
+    }
+
+    orderButton.disabled = true;
+    orderMessage.textContent = "Sending order...";
+
+    try {
+        const response = await fetch(ordersUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name,
+                group: group,
+                items: cart.map(function (item) {
+                    return {
+                        product_id: Number(item.id),
+                        quantity: item.quantity
+                    };
+                })
+            })
+        });
+
+        const data = await response.json().catch(function () {
+            return {};
+        });
+
+        if (!response.ok) {
+            throw new Error(data.message || "Order request failed.");
+        }
+
+        cart = [];
+        orderForm.reset();
+        orderMessage.textContent =
+            "Order #" + data.order.id + " placed. Total: " +
+            formatPrice(Number(data.total)) + " ₸";
+        showCart();
+    } catch (error) {
+        orderMessage.textContent =
+            "Could not place order. Please try again.";
+        console.error(error);
+        showCart();
+    }
+});
 
 // Переключение категорий.
 categoryButtons.forEach(function (button) {
