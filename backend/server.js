@@ -1,13 +1,29 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import pool from "./db.js";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
+const frontendDirectory = path.resolve(backendDirectory, "../frontend");
 
 app.use(cors());
 app.use(express.json());
+
+app.use(function (error, req, res, next) {
+    if (error instanceof SyntaxError && "body" in error) {
+        return res.status(400).json({
+            message: "Request body must contain valid JSON."
+        });
+    }
+
+    next(error);
+});
+
+app.use(express.static(frontendDirectory));
 
 // День 1: проверка сервера
 app.get("/health", function (req, res) {
@@ -56,8 +72,10 @@ app.post("/orders", async function (req, res) {
         if (
             typeof name !== "string" ||
             !name.trim() ||
+            name.trim().length > 100 ||
             typeof group !== "string" ||
             !group.trim() ||
+            group.trim().length > 50 ||
             !Array.isArray(items) ||
             items.length === 0
         ) {
@@ -70,8 +88,11 @@ app.post("/orders", async function (req, res) {
             if (
                 !item ||
                 !Number.isInteger(item.product_id) ||
+                item.product_id <= 0 ||
+                item.product_id > 2147483647 ||
                 !Number.isInteger(item.quantity) ||
-                item.quantity <= 0
+                item.quantity <= 0 ||
+                item.quantity > 100
             ) {
                 return res.status(400).json({
                     message: "Invalid product_id or quantity."
@@ -110,7 +131,9 @@ app.post("/orders", async function (req, res) {
             );
 
             if (productResult.rows.length === 0) {
-                throw new Error(`Product ${item.product_id} not found.`);
+                const error = new Error("One or more products do not exist.");
+                error.statusCode = 400;
+                throw error;
             }
 
             const price = Number(productResult.rows[0].price);
@@ -149,15 +172,21 @@ app.post("/orders", async function (req, res) {
     } catch (error) {
         // Если произошла ошибка — отменяем всё
         if (transactionStarted) {
-            await client.query("ROLLBACK");
+            try {
+                await client.query("ROLLBACK");
+            } catch (rollbackError) {
+                console.error("Could not roll back order:", rollbackError.message);
+            }
         }
 
         console.error(error.message);
 
-        const status = error.message.includes("not found") ? 400 : 500;
+        const status = error.statusCode || 500;
 
         res.status(status).json({
-            message: "Could not save order."
+            message: status === 400
+                ? error.message
+                : "Could not save order."
         });
 
     } finally {
