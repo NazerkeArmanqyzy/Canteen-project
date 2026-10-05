@@ -9,6 +9,7 @@ const app = express();
 const port = Number(process.env.PORT) || 3000;
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 const frontendDirectory = path.resolve(backendDirectory, "../frontend");
+const assetsDirectory = path.resolve(backendDirectory, "../assets");
 
 app.use(cors());
 app.use(express.json());
@@ -24,6 +25,7 @@ app.use(function (error, req, res, next) {
 });
 
 app.use(express.static(frontendDirectory));
+app.use("/assets", express.static(assetsDirectory));
 
 // День 1: проверка сервера
 app.get("/health", function (req, res) {
