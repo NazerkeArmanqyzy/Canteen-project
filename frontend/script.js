@@ -38,6 +38,17 @@ const categoryEmoji = {
     sandwiches: "🥪"
 };
 
+const productImages = {
+    bruny: "bruni.jpeg",
+    snickers: "snickers.jpeg",
+    albeni: "albeni.png",
+    oreo: "oreo.jpeg",
+    ozero: "ozera.jpeg",
+    kitkat: "kitkat.jpeg",
+    bounty: "bounty.webp",
+    barny: "barni.webp"
+};
+
 function formatPrice(price) {
     return price.toLocaleString("ru-RU", {
         maximumFractionDigits: 2
@@ -116,8 +127,23 @@ function showProducts() {
         card.querySelector(".d3").textContent =
             categoryNames[product.category] || product.category;
 
-        card.querySelector(".d4").textContent =
+        const productImage = productImages[product.name.toLowerCase()];
+        const productIcon = card.querySelector(".d4");
+
+        productIcon.textContent =
             categoryEmoji[product.category] || "🍽️";
+
+        if (productImage) {
+            const image = document.createElement("img");
+
+            image.src = apiUrl + "/assets/" + productImage;
+            image.alt = product.name;
+            image.addEventListener("error", function () {
+                image.replaceWith(productIcon);
+            });
+
+            productIcon.replaceWith(image);
+        }
 
         card.querySelector(".d5 h3").textContent = product.name;
 
