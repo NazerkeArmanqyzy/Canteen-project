@@ -74,8 +74,30 @@ const categoryEmoji = {
     sandwiches: "🥪"
 };
 
-// В assets есть фото молочного шоколада. Для остальных блюд оставляем emoji.
+// Фотографии товаров; ключи соответствуют названиям меню в нижнем регистре.
 const productImages = {
+    "bruni": "bruni.jpeg",
+    "snickers": "snickers.jpeg",
+    "bounty": "bounty.webp",
+    "albeni": "albeni.png",
+    "kitkat": "kitkat.jpeg",
+    "barni": "barni.webp",
+    "oreo": "oreo.jpeg",
+    "mars": "mars.jpg",
+    "twix": "twix.jpg",
+    "chicken sandwich": "chicken-sandwich.jpg",
+    "sausage sandwich": "sausage-sandwich.jpg",
+    "chicken samsa": "chicken-samsa.jpg",
+    "toast": "toast.jpg",
+    "egg toast": "egg-toast.jpg",
+    "pepsi": "pepsi.jpg",
+    "maxi tea": "maxi-tea.jpg",
+    "apple juice": "apple-juice.jpg",
+    "mojito": "mojito.jpg",
+    "still water": "still-water.jpg",
+    "chips": "chips.jpg",
+    "kirieshki": "kirieshki.jpg",
+    "khrum": "khrum.jpg",
     "ozera": "ozera.jpeg"
 };
 
@@ -253,7 +275,7 @@ function showProducts() {
         card.querySelector(".d3").textContent =
             categoryNames[product.category] || product.category;
 
-        const productImage = productImages[product.name.toLowerCase()];
+        const productImage = productImages[product.name.trim().toLowerCase().replace(/\s+/g, " ")];
         const productIcon = card.querySelector(".d4");
 
         productIcon.textContent =
