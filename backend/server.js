@@ -8,7 +8,7 @@ import pool from "./db.js";
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
-const frontendDirectory = path.resolve(backendDirectory, "../frontend");
+const frontendDirectory = path.resolve(backendDirectory, "../Frontend");
 const assetsDirectory = path.resolve(backendDirectory, "../assets");
 
 app.use(cors());
@@ -40,6 +40,7 @@ app.get("/products", async function (req, res) {
         const result = await pool.query(`
             SELECT id, name, price, category
             FROM products
+            WHERE is_active = TRUE
             ORDER BY id
         `);
 
@@ -128,7 +129,7 @@ app.post("/orders", async function (req, res) {
         // Создаём order items
         for (const item of items) {
             const productResult = await client.query(
-                "SELECT price FROM products WHERE id = $1",
+                "SELECT price FROM products WHERE id = $1 AND is_active = TRUE",
                 [item.product_id]
             );
 
