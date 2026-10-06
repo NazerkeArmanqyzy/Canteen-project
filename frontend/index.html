@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JIHC Canteen</title>
+    <title>Home | JIHC Canteen</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
 </head>
@@ -11,97 +11,25 @@
     <div class="a">
         <header class="a1" id="home">
             <nav class="a2">
-                <a class="a3" href="#home">✦ JIHC Canteen</a>
+                <a class="a3" href="index.html">✦ JIHC Canteen</a>
 
                 <div class="a4">
-                    <a href="#home">Home</a>
-                    <a href="#menu">Menu</a>
-                    <a href="#about">About</a>
+                    <a href="index.html">Home</a>
+                    <a href="menu.html">Menu</a>
+                    <a href="favorites.html">Favorites</a><a href="about.html">About</a>
                 </div>
 
-                <a class="a5" href="#cart">
+                <a class="a5" href="cart.html">
                     Cart <span id="cart-count">0</span>
                 </a>
             </nav>
 
-            <h1>Menu</h1>
+            <h1>Home</h1>
         </header>
 
-        <main>
-            <div class="b">
-                <h2>Your next tasty break</h2>
-
-                <form class="b1" role="search">
-                    <input
-                        type="search"
-                        id="search"
-                        placeholder="Search for food..."
-                        aria-label="Search for food"
-                    >
-                    <button type="submit">Search</button>
-                </form>
-            </div>
-
-            <div class="c" id="menu">
-                <aside class="c1">
-                    <h3>Category</h3>
-
-                    <div class="c2">
-                        <button
-                            class="c3 c4"
-                            type="button"
-                            data-category="all"
-                        >
-                            All Food <span>0</span>
-                        </button>
-
-                        <button
-                            class="c3"
-                            type="button"
-                            data-category="chocolate"
-                        >
-                            Chocolate
-                        </button>
-
-                        <button
-                            class="c3"
-                            type="button"
-                            data-category="juices"
-                        >
-                            Juices
-                        </button>
-
-                        <button
-                            class="c3"
-                            type="button"
-                            data-category="snacks"
-                        >
-                            Snacks
-                        </button>
-
-                        <button
-                            class="c3"
-                            type="button"
-                            data-category="sandwiches"
-                        >
-                            Sandwiches & Toasts
-                        </button>
-                    </div>
-
-                    <div class="c5">
-                        <span class="c6"></span>
-                        Fresh for your break
-                    </div>
-                </aside>
-
-                <div class="d" id="products" aria-busy="true">
-                    <p>Loading menu...</p>
-                </div>
-
-                <!-- Шаблон карточки для блюд из базы -->
-                <template id="product-template">
+<main><div class="b"><h2>Your next tasty break</h2><a class="i3" href="menu.html">Explore Menu ↗</a></div><section class="e"><h2>Try these favorites</h2><div class="e1" id="recommendations"><p>Loading favorites...</p></div></section><template id="product-template">
                     <article class="d1">
-                        <div class="d2">
+                        <div class="d2"><button class="j1" type="button" aria-label="Add to favorites">♡</button>
                             <span class="d3"></span>
                             <span class="d4" aria-hidden="true"></span>
                         </div>
@@ -121,58 +49,7 @@
                             </button>
                         </div>
                     </article>
-                </template>
-            </div>
-
-            <section class="e">
-                <h2>Try these favorites</h2>
-
-                <div class="e1">
-                    <article class="d1">
-                        <div class="d2">
-                            <span class="d3">Sandwiches</span>
-                            <span class="d4" aria-hidden="true">🥪</span>
-                        </div>
-
-                        <div class="d5">
-                            <h3>Chicken Sandwich</h3>
-                            <p>850 ₸</p>
-                        </div>
-
-                        <p class="e2">A tasty lunch break</p>
-                    </article>
-
-                    <article class="d1">
-                        <div class="d2">
-                            <span class="d3">Juices</span>
-                            <span class="d4" aria-hidden="true">🧃</span>
-                        </div>
-
-                        <div class="d5">
-                            <h3>Apple Juice</h3>
-                            <p>350 ₸</p>
-                        </div>
-
-                        <p class="e2">Something refreshing</p>
-                    </article>
-
-                    <article class="d1">
-                        <div class="d2">
-                            <span class="d3">Chocolate</span>
-                            <span class="d4" aria-hidden="true">🍫</span>
-                        </div>
-
-                        <div class="d5">
-                            <h3>Milk Chocolate</h3>
-                            <p>450 ₸</p>
-                        </div>
-
-                        <p class="e2">A little sweet treat</p>
-                    </article>
-                </div>
-            </section>
-
-            <section class="f" id="about">
+                </template>            <section class="f" id="about">
                 <h2>Fresh food.<br>Better breaks.</h2>
 
                 <div class="f1">
@@ -183,88 +60,29 @@
                         your break at JIHC.
                     </p>
 
-                    <a href="#menu">Explore Menu ↗</a>
+                    <a href="menu.html">Explore Menu ↗</a>
                 </div>
             </section>
 
-            <section class="g" id="cart">
-                <div>
-                    <h2>Your Cart</h2>
-
-                    <div id="cart-items" aria-live="polite">
-                        <p>Your cart is empty.</p>
-                    </div>
-
-                </div>
-
-                <p class="g1">
-                    Total: <span id="total">0</span> ₸
-                </p>
-            </section>
-
-            <section class="i">
-                <h2>Place your order</h2>
-
-                <form class="i1" id="order-form">
-                    <div class="i2">
-                        <label for="customer-name">Name</label>
-
-                        <input
-                            type="text"
-                            id="customer-name"
-                            name="name"
-                            placeholder="Your name"
-                            maxlength="100"
-                            autocomplete="name"
-                            required
-                        >
-                    </div>
-
-                    <div class="i2">
-                        <label for="student-group">Group</label>
-
-                        <input
-                            type="text"
-                            id="student-group"
-                            name="group"
-                            placeholder="Your group"
-                            maxlength="50"
-                            required
-                        >
-                    </div>
-
-                    <button
-                        class="i3"
-                        id="order-button"
-                        type="submit"
-                    >
-                        Place Order
-                    </button>
-                </form>
-
-                <p class="i4" id="order-message" role="status"></p>
-            </section>
-        </main>
-
-        <footer>
+</main>        <footer>
             <div class="h">
                 <div>
-                    <a class="a3" href="#home">✦ JIHC Canteen</a>
+                    <a class="a3" href="index.html">✦ JIHC Canteen</a>
                     <p>Your next tasty break.</p>
                 </div>
 
                 <div class="h1">
                     <h3>Explore</h3>
-                    <a href="#home">Home</a>
-                    <a href="#menu">Menu</a>
-                    <a href="#about">About</a>
+                    <a href="index.html">Home</a>
+                    <a href="menu.html">Menu</a>
+                    <a href="about.html">About</a>
                 </div>
 
                 <div class="h1">
                     <h3>Categories</h3>
-                    <a href="#menu">Chocolate & Juices</a>
-                    <a href="#menu">Snacks</a>
-                    <a href="#menu">Sandwiches & Toasts</a>
+                    <a href="menu.html">Chocolate & Drinks</a>
+                    <a href="menu.html">Snacks</a>
+                    <a href="menu.html">Sandwiches & Toasts</a>
                 </div>
             </div>
 

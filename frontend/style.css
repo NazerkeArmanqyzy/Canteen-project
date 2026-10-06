@@ -8,10 +8,15 @@ html {
 
 body {
     margin: 0;
-    padding: 45px 20px;
+
+    padding: 32px 24px;
     font-family: Arial, sans-serif;
     color: #283d30;
     background-color: #e7e5de;
+
+    font-size: 15px;
+
+    line-height: 1.5;
 }
 
 a {
@@ -44,11 +49,15 @@ button:disabled {
     max-width: 1180px;
     margin: 0 auto;
     background-color: #fcfaf5;
+
+    border-radius: 20px;
+
+    overflow: hidden;
 }
 
 /* Главный баннер */
 .a1 {
-    height: 390px;
+    height: 265px;
     position: relative;
     overflow: hidden;
     background-color: #dce8d5;
@@ -65,9 +74,11 @@ button:disabled {
     position: relative;
     z-index: 2;
     width: 90%;
-    height: 70px;
+
+    height: 76px;
     margin: 0 auto;
-    padding: 0 26px;
+
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -77,15 +88,17 @@ button:disabled {
 }
 
 .a3 {
-    font-size: 17px;
+    font-size: 19px;
     font-weight: bold;
     white-space: nowrap;
 }
 
 .a4 {
     display: flex;
-    gap: 28px;
-    font-size: 13px;
+
+    gap: 26px;
+
+    font-size: 15px;
 }
 
 .a4 a:hover,
@@ -97,57 +110,77 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+
+    font-size: 15px;
 }
 
 .a5 span {
-    min-width: 22px;
-    height: 22px;
+    min-width: 26px;
+
+    height: 26px;
     padding: 0 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     background-color: #dce8d5;
-    font-size: 11px;
+
+    font-size: 12px;
 }
 
 .a1 h1 {
     position: absolute;
-    bottom: -45px;
-    left: 0;
-    width: 100%;
+
+    bottom: 38px;
+
+    left: 5%;
+
+    width: 90%;
     margin: 0;
-    color: #fcfaf5;
-    font-size: clamp(120px, 22vw, 290px);
+
+    color: #283d30;
+
+    font-size: 76px;
     font-weight: bold;
-    text-align: center;
-    letter-spacing: -16px;
-    line-height: 1;
+
+    text-align: left;
+
+    letter-spacing: -4px;
+
+    line-height: 1.05;
 }
 
 main {
     position: relative;
-    padding: 0 5% 40px;
+
+    padding: 0 5% 48px;
 }
 
 /* Поиск */
 .b {
     position: relative;
     z-index: 3;
-    margin-top: -30px;
-    padding: 22px 25px;
+
+    margin-top: -20px;
+
+    padding: 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 25px;
+
+    gap: 24px;
     background-color: #fcfaf5;
     border-radius: 15px 15px 0 0;
+
+    min-height: 94px;
 }
 
 .b h2 {
     margin: 0;
-    font-size: 21px;
+
+    font-size: 24px;
+
+    line-height: 1.3;
 }
 
 .b1 {
@@ -155,43 +188,56 @@ main {
     display: flex;
     align-items: center;
     gap: 10px;
+
+    padding: 4px 4px 4px 16px;
+
+    background-color: #e5eddf;
+
+    border-radius: 28px;
 }
 
 .b1 input {
     width: 100%;
     min-width: 0;
-    padding: 12px 0;
+
+    padding: 10px 0;
     border: none;
     color: #283d30;
     background-color: transparent;
-    font-size: 12px;
+
+    font-size: 14px;
 }
 
 .b1 button {
-    padding: 10px 20px;
+    padding: 11px 22px;
     border: none;
     border-radius: 25px;
     color: #fcfaf5;
     background-color: #283d30;
-    font-size: 11px;
+
+    font-size: 14px;
+
+    min-height: 42px;
 }
 
 /* Категории и товары */
 .c {
-    padding-top: 25px;
+    padding-top: 28px;
     display: flex;
     align-items: flex-start;
-    gap: 30px;
+
+    gap: 28px;
 }
 
 .c1 {
-    width: 165px;
+    width: 180px;
     flex-shrink: 0;
 }
 
 .c1 h3 {
     margin: 8px 0 20px;
-    font-size: 15px;
+
+    font-size: 17px;
 }
 
 .c2 {
@@ -202,17 +248,20 @@ main {
 
 .c3 {
     width: 100%;
-    padding: 11px 10px;
+
+    padding: 13px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 5px;
     border: none;
-    border-radius: 7px;
+
+    border-radius: 10px;
     text-align: left;
     background-color: transparent;
     color: #687467;
-    font-size: 12px;
+
+    font-size: 14px;
 }
 
 .c3:hover,
@@ -225,7 +274,8 @@ main {
     padding: 3px 6px;
     border-radius: 4px;
     background-color: #fcfaf5;
-    font-size: 10px;
+
+    font-size: 12px;
 }
 
 .c5 {
@@ -234,7 +284,8 @@ main {
     align-items: center;
     gap: 7px;
     color: #687467;
-    font-size: 10px;
+
+    font-size: 12px;
     line-height: 1.5;
 }
 
@@ -252,6 +303,7 @@ main {
     min-width: 0;
     display: flex;
     flex-wrap: wrap;
+
     gap: 28px 20px;
 }
 
@@ -261,13 +313,14 @@ main {
 }
 
 .d2 {
-    height: 210px;
+    height: 190px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border-radius: 12px;
+
+    border-radius: 14px;
     border: 1px solid #dfe4dc;
     background-color: #fff;
 }
@@ -285,11 +338,13 @@ main {
     top: 10px;
     right: 10px;
     max-width: calc(100% - 20px);
-    padding: 4px 9px;
+
+    padding: 5px 10px;
     border-radius: 20px;
     background-color: #fcfaf5;
     color: #52624e;
-    font-size: 9px;
+
+    font-size: 11px;
 }
 
 .d4 {
@@ -304,39 +359,55 @@ main {
 }
 
 .d5 {
-    margin-top: 12px;
+    margin-top: 14px;
     display: flex;
-    align-items: baseline;
+
+    align-items: flex-start;
     justify-content: space-between;
     gap: 8px;
+
+    min-height: 48px;
 }
 
 .d5 h3 {
     margin: 0;
-    font-size: 12px;
+
+    font-size: 15px;
     font-weight: 600;
+
     line-height: 1.4;
 }
 
 .d5 p {
     margin: 0;
     flex-shrink: 0;
-    font-size: 12px;
+
+    font-size: 14px;
     font-weight: bold;
+
+    line-height: 1.5;
 }
 
 .d6 {
     margin-top: 12px;
     display: flex;
-    gap: 7px;
+
+    gap: 8px;
 }
 
 .d6 button {
     flex: 1;
-    padding: 9px 3px;
+
+    padding: 10px 6px;
     border: none;
-    border-radius: 20px;
-    font-size: 10px;
+
+    border-radius: 22px;
+
+    font-size: 12px;
+
+    min-height: 42px;
+
+    font-weight: 600;
 }
 
 .d7 {
@@ -362,7 +433,8 @@ main {
 .d > p {
     margin: 10px 0;
     color: #687467;
-    font-size: 12px;
+
+    font-size: 14px;
 }
 
 .d9 {
@@ -371,18 +443,23 @@ main {
     border-radius: 20px;
     background-color: #e5eddf;
     color: #283d30;
-    font-size: 12px;
+
+    font-size: 14px;
+
+    min-height: 44px;
 }
 
 /* Рекомендации */
 .e {
-    margin-top: 65px;
+    margin-top: 42px;
 }
 
 .e h2 {
     margin: 0 0 25px;
-    font-size: 27px;
-    letter-spacing: -1px;
+
+    font-size: 28px;
+
+    letter-spacing: -0.7px;
 }
 
 .e1 {
@@ -395,19 +472,21 @@ main {
 }
 
 .e1 .d2 {
-    height: 230px;
+    height: 210px;
 }
 
 .e2 {
     margin: 9px 0 0;
     color: #687467;
-    font-size: 11px;
+
+    font-size: 14px;
 }
 
 /* Нижний баннер */
 .f {
-    margin-top: 60px;
-    padding: 35px;
+    margin-top: 42px;
+
+    padding: 32px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -418,40 +497,46 @@ main {
 
 .f h2 {
     margin: 0;
-    font-size: 43px;
+
+    font-size: 38px;
     font-weight: 500;
     line-height: 1.1;
-    letter-spacing: -2px;
+
+    letter-spacing: -1.5px;
 }
 
 .f1 {
-    max-width: 250px;
+    max-width: 290px;
 }
 
 .f1 h3 {
     margin: 0 0 10px;
-    font-size: 13px;
+
+    font-size: 16px;
 }
 
 .f1 p {
     margin: 0 0 15px;
-    font-size: 12px;
+
+    font-size: 14px;
     line-height: 1.6;
 }
 
 .f1 a {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
 }
 
 /* Корзина */
 .g {
-    margin-top: 35px;
-    padding: 22px 0;
+    margin-top: 24px;
+
+    padding: 28px 0;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 20px;
+
+    gap: 28px;
     border-top: 1px solid #e1e4d9;
 }
 
@@ -461,30 +546,42 @@ main {
 }
 
 .g h2 {
-    margin: 0 0 12px;
-    font-size: 19px;
+    margin: 0 0 20px;
+
+    font-size: 24px;
 }
 
 #cart-items p {
     margin: 0;
     color: #687467;
-    font-size: 12px;
+
+    font-size: 14px;
 }
 
 .g1 {
     margin: 0;
     flex-shrink: 0;
-    font-size: 14px;
+
+    font-size: 18px;
     font-weight: bold;
+
+    padding: 12px 18px;
+
+    background-color: #e5eddf;
+
+    border-radius: 12px;
 }
 
 /* Блюдо в корзине */
 .g2 {
-    padding: 14px 0;
+    padding: 20px 0;
     display: flex;
     align-items: center;
-    gap: 20px;
+
+    gap: 24px;
     border-bottom: 1px solid #e1e4d9;
+
+    min-height: 90px;
 }
 
 .g3 {
@@ -493,24 +590,29 @@ main {
 
 .g3 h3 {
     margin: 0 0 6px;
-    font-size: 13px;
+
+    font-size: 17px;
 }
 
 .g4 {
     display: flex;
     align-items: center;
-    gap: 8px;
+
+    gap: 10px;
 }
 
 .g4 button {
-    min-width: 28px;
-    height: 28px;
+    min-width: 38px;
+
+    height: 38px;
     padding: 0 8px;
     border: none;
-    border-radius: 15px;
+
+    border-radius: 20px;
     background-color: #e5eddf;
     color: #283d30;
-    font-size: 12px;
+
+    font-size: 16px;
 }
 
 .g4 button:hover {
@@ -518,40 +620,49 @@ main {
 }
 
 .g4 span {
-    min-width: 20px;
+    min-width: 24px;
     text-align: center;
-    font-size: 12px;
+
+    font-size: 15px;
 }
 
 .g4 .g6 {
     margin-left: 6px;
     background-color: transparent;
     color: #687467;
-    font-size: 11px;
+
+    font-size: 13px;
+
+    padding: 0 12px;
 }
 
 .g5 {
-    min-width: 85px;
+    min-width: 95px;
     text-align: right;
-    font-size: 12px;
+
+    font-size: 16px;
 }
 
 /* Форма заказа */
 .i {
     margin-top: 20px;
-    padding: 25px;
-    border-radius: 15px;
+
+    padding: 28px;
+
+    border-radius: 16px;
     background-color: #e5eddf;
 }
 
 .i h2 {
-    margin: 0 0 20px;
-    font-size: 19px;
+    margin: 0 0 24px;
+
+    font-size: 24px;
 }
 
 .i1 {
     display: flex;
     align-items: flex-end;
+
     gap: 20px;
 }
 
@@ -563,27 +674,45 @@ main {
 }
 
 .i2 label {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
 }
 
 .i2 input {
     width: 100%;
-    padding: 12px 15px;
+
+    padding: 13px 16px;
     border: 1px solid #d3dccd;
-    border-radius: 8px;
+
+    border-radius: 10px;
     background-color: #fcfaf5;
     color: #283d30;
-    font-size: 12px;
+
+    font-size: 15px;
+
+    min-height: 48px;
 }
 
 .i3 {
-    padding: 13px 25px;
+    padding: 13px 24px;
     border: none;
     border-radius: 25px;
     background-color: #283d30;
     color: #fcfaf5;
-    font-size: 12px;
+
+    font-size: 14px;
+
+    min-height: 48px;
+
+    font-weight: 600;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    white-space: nowrap;
 }
 
 .i3:hover {
@@ -596,7 +725,8 @@ main {
 
 .i4 {
     margin: 15px 0 0;
-    font-size: 12px;
+
+    font-size: 14px;
     line-height: 1.5;
 }
 
@@ -618,9 +748,10 @@ footer {
 }
 
 .h {
-    padding: 25px 0 40px;
+    padding: 30px 0 36px;
     display: flex;
-    gap: 65px;
+
+    gap: 56px;
 }
 
 .h > div:first-child {
@@ -630,7 +761,8 @@ footer {
 .h p {
     margin-top: 12px;
     color: #687467;
-    font-size: 12px;
+
+    font-size: 14px;
 }
 
 .h1 {
@@ -641,12 +773,14 @@ footer {
 
 .h1 h3 {
     margin: 0 0 5px;
-    font-size: 13px;
+
+    font-size: 15px;
 }
 
 .h1 a {
     color: #687467;
-    font-size: 11px;
+
+    font-size: 13px;
 }
 
 .h2 {
@@ -656,5 +790,21 @@ footer {
     gap: 15px;
     border-top: 1px solid #e1e4d9;
     color: #687467;
-    font-size: 9px;
+
+    font-size: 12px;
 }
+
+/* Новые элементы используют существующую палитру и оформление. */
+[hidden] { display: none !important; }
+.j { display: flex; align-items: center; gap: 14px; padding: 20px 0 0; font-size: 14px; }
+.j select { padding: 9px 12px; border: 1px solid #d3dccd; border-radius: 8px; background: #fcfaf5; color: #283d30; font: inherit; }
+.j p { margin: 0 0 0 auto; color: #687467; }
+.j1 { position: absolute; top: 10px; left: 10px; z-index: 1; width: 36px; height: 36px; border: none; border-radius: 50%; background: #fcfaf5; color: #283d30; font-size: 24px; }
+.j2 details { padding: 18px 0; border-bottom: 1px solid #e1e4d9; font-size: 15px; }
+.j2 summary { cursor: pointer; font-weight: bold; }
+.j2 p, #confirmation p { font-size: 15px; line-height: 1.6; }
+
+
+select:focus-visible { outline: 2px solid #44674b; outline-offset: 3px; }
+#confirmation-items { padding: 4px 0; border-bottom: 1px solid #d3dccd; }
+#confirmation-total { font-weight: 600; }
