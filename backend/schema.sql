@@ -69,3 +69,6 @@ FROM (
         ('Cheese Sandwich', 700, 'sandwiches')
 ) AS menu(name, price, category)
 WHERE NOT EXISTS (SELECT 1 FROM products);
+
+-- Доступность товаров в текущем меню.
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
