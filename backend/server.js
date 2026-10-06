@@ -7,6 +7,7 @@ import pool from "./db.js";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 const frontendDirectory = path.resolve(backendDirectory, "../Frontend");
 const assetsDirectory = path.resolve(backendDirectory, "../assets");
@@ -14,27 +15,17 @@ const assetsDirectory = path.resolve(backendDirectory, "../assets");
 app.use(cors());
 app.use(express.json());
 
-app.use(function (error, req, res, next) {
-    if (error instanceof SyntaxError && "body" in error) {
-        return res.status(400).json({
-            message: "Request body must contain valid JSON."
-        });
-    }
-
-    next(error);
-});
-
 app.use(express.static(frontendDirectory));
 app.use("/assets", express.static(assetsDirectory));
 
-// День 1: проверка сервера
+// Проверка сервера
 app.get("/health", function (req, res) {
     res.json({
         message: "Server is working."
     });
 });
 
-// День 2: получение меню из базы
+// Получить товары
 app.get("/products", async function (req, res) {
     try {
         const result = await pool.query(`
@@ -44,16 +35,7 @@ app.get("/products", async function (req, res) {
             ORDER BY id
         `);
 
-        const products = result.rows.map(function (product) {
-            return {
-                id: product.id,
-                name: product.name,
-                price: Number(product.price),
-                category: product.category
-            };
-        });
-
-        res.json(products);
+        res.json(result.rows);
     } catch (error) {
         console.error(error.message);
 
@@ -63,80 +45,49 @@ app.get("/products", async function (req, res) {
     }
 });
 
-// День 4: проверка заказа, расчёт total и transaction
+// Создать заказ
 app.post("/orders", async function (req, res) {
-    let client;
-    let transactionStarted = false;
+    const { name, group, items } = req.body;
+
+    if (!name || !group || !items || items.length === 0) {
+        return res.status(400).json({
+            message: "Name, group and items are required."
+        });
+    }
+
+    const client = await pool.connect();
 
     try {
-        const { name, group, items } = req.body || {};
-
-        // Проверка данных
-        if (
-            typeof name !== "string" ||
-            !name.trim() ||
-            name.trim().length > 100 ||
-            typeof group !== "string" ||
-            !group.trim() ||
-            group.trim().length > 50 ||
-            !Array.isArray(items) ||
-            items.length === 0
-        ) {
-            return res.status(400).json({
-                message: "Name, group and items are required."
-            });
-        }
-
-        for (const item of items) {
-            if (
-                !item ||
-                !Number.isInteger(item.product_id) ||
-                item.product_id <= 0 ||
-                item.product_id > 2147483647 ||
-                !Number.isInteger(item.quantity) ||
-                item.quantity <= 0 ||
-                item.quantity > 100
-            ) {
-                return res.status(400).json({
-                    message: "Invalid product_id or quantity."
-                });
-            }
-        }
-
-        client = await pool.connect();
-
         // Начинаем transaction
         await client.query("BEGIN");
-        transactionStarted = true;
 
-        let total = 0;
-
-        // Создаём order
+        // Создаём заказ
         const orderResult = await client.query(
             `
-                INSERT INTO orders (
-                    customer_name,
-                    student_group
-                )
-                VALUES ($1, $2)
-                RETURNING *
+            INSERT INTO orders (customer_name, student_group)
+            VALUES ($1, $2)
+            RETURNING *
             `,
-            [name.trim(), group.trim()]
+            [name, group]
         );
 
         const order = orderResult.rows[0];
 
-        // Создаём order items
+        let total = 0;
+
+        // Добавляем товары заказа
         for (const item of items) {
             const productResult = await client.query(
-                "SELECT price FROM products WHERE id = $1 AND is_active = TRUE",
+                `
+                SELECT price
+                FROM products
+                WHERE id = $1 AND is_active = TRUE
+                `,
                 [item.product_id]
             );
 
             if (productResult.rows.length === 0) {
-                const error = new Error("One or more products do not exist.");
-                error.statusCode = 400;
-                throw error;
+                throw new Error("Product not found.");
             }
 
             const price = Number(productResult.rows[0].price);
@@ -145,13 +96,9 @@ app.post("/orders", async function (req, res) {
 
             await client.query(
                 `
-                    INSERT INTO order_items (
-                        order_id,
-                        product_id,
-                        quantity,
-                        price
-                    )
-                    VALUES ($1, $2, $3, $4)
+                INSERT INTO order_items
+                (order_id, product_id, quantity, price)
+                VALUES ($1, $2, $3, $4)
                 `,
                 [
                     order.id,
@@ -162,9 +109,8 @@ app.post("/orders", async function (req, res) {
             );
         }
 
-        // Всё успешно — сохраняем transaction
+        // Сохраняем transaction
         await client.query("COMMIT");
-        transactionStarted = false;
 
         res.status(201).json({
             message: "Order created.",
@@ -173,33 +119,21 @@ app.post("/orders", async function (req, res) {
         });
 
     } catch (error) {
-        // Если произошла ошибка — отменяем всё
-        if (transactionStarted) {
-            try {
-                await client.query("ROLLBACK");
-            } catch (rollbackError) {
-                console.error("Could not roll back order:", rollbackError.message);
-            }
-        }
+        // Отменяем transaction при ошибке
+        await client.query("ROLLBACK");
 
         console.error(error.message);
 
-        const status = error.statusCode || 500;
-
-        res.status(status).json({
-            message: status === 400
-                ? error.message
-                : "Could not save order."
+        res.status(500).json({
+            message: "Could not save order."
         });
 
     } finally {
-        // Возвращаем connection обратно в pool
-        if (client) {
-            client.release();
-        }
+        client.release();
     }
 });
 
+// Если такого route нет
 app.use(function (req, res) {
     res.status(404).json({
         message: "Route not found."
