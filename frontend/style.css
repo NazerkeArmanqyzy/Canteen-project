@@ -64,9 +64,6 @@ button:disabled {
     background-size: cover;
     background-position: center;
 
-    /* Позже вставь фото столовой:
-    background-image: url("images/canteen.jpg");
-    */
 }
 
 /* Навигация */
@@ -794,17 +791,85 @@ footer {
     font-size: 12px;
 }
 
-/* Новые элементы используют существующую палитру и оформление. */
-[hidden] { display: none !important; }
-.j { display: flex; align-items: center; gap: 14px; padding: 20px 0 0; font-size: 14px; }
-.j select { padding: 9px 12px; border: 1px solid #d3dccd; border-radius: 8px; background: #fcfaf5; color: #283d30; font: inherit; }
-.j p { margin: 0 0 0 auto; color: #687467; }
-.j1 { position: absolute; top: 10px; left: 10px; z-index: 1; width: 36px; height: 36px; border: none; border-radius: 50%; background: #fcfaf5; color: #283d30; font-size: 24px; }
-.j2 details { padding: 18px 0; border-bottom: 1px solid #e1e4d9; font-size: 15px; }
-.j2 summary { cursor: pointer; font-weight: bold; }
-.j2 p, #confirmation p { font-size: 15px; line-height: 1.6; }
+/* Скрытые элементы */
+[hidden] {
+    display: none !important;
+}
 
+/* Панель сортировки */
+.j {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 20px;
+    font-size: 14px;
+}
 
-select:focus-visible { outline: 2px solid #44674b; outline-offset: 3px; }
-#confirmation-items { padding: 4px 0; border-bottom: 1px solid #d3dccd; }
-#confirmation-total { font-weight: 600; }
+.j select {
+    padding: 9px 12px;
+    border: 1px solid #d3dccd;
+    border-radius: 8px;
+    background-color: #fcfaf5;
+    color: #283d30;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.j p {
+    margin: 0;
+    margin-left: auto;
+    color: #687467;
+}
+
+/* Кнопка избранного */
+.j1 {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background-color: #fcfaf5;
+    color: #283d30;
+    font-size: 24px;
+}
+
+/* Вопросы и ответы */
+.j2 details {
+    padding: 18px 0;
+    border-bottom: 1px solid #e1e4d9;
+    font-size: 15px;
+}
+
+.j2 summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.j2 p {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Выделение при управлении клавиатурой */
+select:focus-visible {
+    outline: 2px solid #44674b;
+    outline-offset: 3px;
+}
+
+/* Подтверждение заказа */
+#confirmation p {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+#confirmation-items {
+    padding: 4px 0;
+    border-bottom: 1px solid #d3dccd;
+}
+
+#confirmation-total {
+    font-weight: 600;
+}
