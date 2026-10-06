@@ -76,7 +76,14 @@ const categoryEmoji = {
 
 // В assets есть фото молочного шоколада. Для остальных блюд оставляем emoji.
 const productImages = {
-    "ozera": "ozera.jpeg"
+    "albeni": "albeni.png",
+    "barni": "barni.webp",
+    "bounty": "bounty.webp",
+    "bruni": "bruni.jpeg",
+    "kitkat": "kitkat.jpeg",
+    "oreo": "oreo.jpeg",
+    "ozera": "ozera.jpeg",
+    "snickers": "snickers.jpeg"
 };
 
 // Общие данные товара из меню или сохранённой корзины.
