@@ -14,12 +14,16 @@ const cartKey = "jihc-canteen-cart", favoritesKey = "jihc-canteen-favorites";
 const isFavorites = location.pathname.endsWith("favorites.html");
 const categoryNames = { chocolate: "Chocolate", juices: "Juices & Drinks", snacks: "Snacks", sandwiches: "Sandwiches" };
 const emoji = { chocolate: "🍫", juices: "🧃", snacks: "🍿", sandwiches: "🥪" };
-const productImages = { ozera: "ozera.jpeg" };
+const productImages = {
+    "bruni": "bruni.jpeg", "snickers": "snickers.jpeg", "bounty": "bounty.webp", "albeni": "albeni.png", "kitkat": "kitkat.jpeg", "barni": "barni.webp",
+    "oreo": "oreo.jpeg", "mars": "mars.jpg", "twix": "twix.jpg", "chicken sandwich": "chicken-sandwich.jpg", "sausage sandwich": "sausage-sandwich.jpg", "chicken samsa": "chicken-samsa.jpg",
+    "toast": "toast.jpg", "egg toast": "egg-toast.jpg", "pepsi": "pepsi.jpg", "maxi tea": "maxi-tea.jpg", "apple juice": "apple-juice.jpg", "mojito": "mojito.jpg",
+    "still water": "still-water.jpg", "chips": "chips.jpg", "kirieshki": "kirieshki.jpg", "khrum": "khrum.jpg", "ozera": "ozera.jpeg"
+};
 let products = [], cart = [];
 let favoriteIds = readStorage(favoritesKey).filter(Number.isInteger);
 let category = "all";
-let ready = false, busy = false;
-// Сохранение данных в браузере.
+let ready = false, busy = false, loading = false;
 function readStorage(key) {
     try {
         const data = JSON.parse(localStorage.getItem(key) || "[]");
@@ -60,7 +64,6 @@ function message(text, type = "") {
     if (orderMessage) { orderMessage.textContent = text; orderMessage.className = "i4 " + type; }
 }
 function menuMessage(text) { container?.replaceChildren(element("p", text)); }
-// Меню, поиск, категории и сортировка.
 function showProducts() {
     if (!ready || !container || !template) return;
     const query = search ? search.value.trim().toLowerCase() : "";
@@ -81,7 +84,7 @@ function showProducts() {
         text(".d5 p", price(item.price) + " ₸", card);
         const icon = card.querySelector(".d4");
         icon.textContent = emoji[item.category] || "🍽️";
-        const file = productImages[item.name.toLowerCase()];
+        const file = productImages[item.name.trim().toLowerCase().replace(/\s+/g, " ")];
         if (file) {
             const image = document.createElement("img");
             image.src = apiUrl + "/assets/" + file; image.alt = item.name;
@@ -101,7 +104,7 @@ function showProducts() {
         heart.setAttribute("aria-pressed", String(saved));
         heart.setAttribute("aria-label", (saved ? "Remove " : "Save ") + item.name + " in favorites");
         heart.addEventListener("click", () => {
-            favoriteIds = saved ? favoriteIds.filter(id => id !== item.id) : [...favoriteIds, item.id];
+            if (busy) return; favoriteIds = saved ? favoriteIds.filter(id => id !== item.id) : [...favoriteIds, item.id];
             saveStorage(favoritesKey, favoriteIds); showProducts();
         });
         container.append(card);
@@ -109,7 +112,7 @@ function showProducts() {
     if (!visible.length) menuMessage(isFavorites ? "No favorites yet. Save food with ♡ on Menu." : "No food found.");
 }
 async function loadProducts() {
-    ready = false; updateOrderButton();
+    if (busy || loading) return; loading = true; ready = false; updateOrderButton();
     menuMessage("Loading menu...");
     try {
         const response = await fetch(apiUrl + "/products");
@@ -131,11 +134,10 @@ async function loadProducts() {
         retry.className = "d9"; container?.append(retry);
         console.error(error);
     } finally {
-        text('[data-category="all"] span', products.length);
+        loading = false; text('[data-category="all"] span', products.length);
         updateOrderButton();
     }
 }
-// Корзина и количество товаров.
 function addToCart(id) {
     if (busy || !ready) return false;
     const item = find(cart, id);
@@ -185,12 +187,11 @@ function updateCart() {
 function updateOrderButton() { if (orderButton) orderButton.disabled = busy || !ready || !cart.length; }
 function setBusy(value) {
     busy = value;
-    nameInput.disabled = value; groupInput.disabled = value;
+    nameInput.disabled = value; groupInput.disabled = value; form.setAttribute("aria-busy", String(value));
     orderButton.textContent = value ? "Sending..." : "Place Order";
-    for (const node of document.querySelectorAll("#cart-items button")) node.disabled = value;
+    for (const node of document.querySelectorAll("#products button, #recommendations button, #cart-items button")) node.disabled = value;
     updateOrderButton();
 }
-// Оформление и подтверждение заказа.
 form?.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy) return;
@@ -226,7 +227,6 @@ form?.addEventListener("submit", async event => {
         console.error(error);
     } finally { setBusy(false); }
 });
-// Обработчики поиска, сортировки и категорий.
 search?.addEventListener("input", showProducts);
 sort?.addEventListener("change", showProducts);
 get(".b1")?.addEventListener("submit", event => { event.preventDefault(); showProducts(); });
