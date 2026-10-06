@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu | JIHC Canteen</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="a">
+        <header class="a1" id="home">
+            <nav class="a2">
+                <a class="a3" href="index.html">✦ JIHC Canteen</a>
+
+                <div class="a4">
+                    <a href="index.html">Home</a>
+                    <a href="menu.html">Menu</a>
+                    <a href="favorites.html">Favorites</a><a href="about.html">About</a>
+                </div>
+
+                <a class="a5" href="cart.html">
+                    Cart <span id="cart-count">0</span>
+                </a>
+            </nav>
+
+            <h1>Menu</h1>
+        </header>
+
+<main>            <div class="b">
+                <h2>Your next tasty break</h2>
+
+                <form class="b1" role="search">
+                    <input
+                        type="search"
+                        id="search"
+                        placeholder="Search for food..."
+                        aria-label="Search for food"
+                    >
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+<div class="j"><label for="sort">Sort by</label><select id="sort"><option value="default">Default</option><option value="low">Price: Low to High</option><option value="high">Price: High to Low</option></select><p id="feedback" role="status"></p></div>            <div class="c" id="menu">
+                <aside class="c1">
+                    <h3>Category</h3>
+
+                    <div class="c2">
+                        <button
+                            class="c3 c4"
+                            type="button"
+                            data-category="all"
+                        >
+                            All Food <span>0</span>
+                        </button>
+
+                        <button
+                            class="c3"
+                            type="button"
+                            data-category="chocolate"
+                        >
+                            Chocolate
+                        </button>
+
+                        <button
+                            class="c3"
+                            type="button"
+                            data-category="juices"
+                        >
+                            Juices & Drinks
+                        </button>
+
+                        <button
+                            class="c3"
+                            type="button"
+                            data-category="snacks"
+                        >
+                            Snacks
+                        </button>
+
+                        <button
+                            class="c3"
+                            type="button"
+                            data-category="sandwiches"
+                        >
+                            Sandwiches & Toasts
+                        </button>
+                    </div>
+
+                    <div class="c5">
+                        <span class="c6"></span>
+                        Fresh for your break
+                    </div>
+                </aside>
+
+                <div class="d" id="products" aria-busy="true">
+                    <p>Loading menu...</p>
+                </div>
+
+                <!-- Шаблон карточки для блюд из базы -->
+                <template id="product-template">
+                    <article class="d1">
+                        <div class="d2"><button class="j1" type="button" aria-label="Add to favorites">♡</button>
+                            <span class="d3"></span>
+                            <span class="d4" aria-hidden="true"></span>
+                        </div>
+
+                        <div class="d5">
+                            <h3></h3>
+                            <p></p>
+                        </div>
+
+                        <div class="d6">
+                            <button class="d7" type="button">
+                                Add to Cart
+                            </button>
+
+                            <button class="d8" type="button">
+                                Order Now
+                            </button>
+                        </div>
+                    </article>
+                </template>
+            </div>
+
+</main>        <footer>
+            <div class="h">
+                <div>
+                    <a class="a3" href="index.html">✦ JIHC Canteen</a>
+                    <p>Your next tasty break.</p>
+                </div>
+
+                <div class="h1">
+                    <h3>Explore</h3>
+                    <a href="index.html">Home</a>
+                    <a href="menu.html">Menu</a>
+                    <a href="about.html">About</a>
+                </div>
+
+                <div class="h1">
+                    <h3>Categories</h3>
+                    <a href="menu.html">Chocolate & Drinks</a>
+                    <a href="menu.html">Snacks</a>
+                    <a href="menu.html">Sandwiches & Toasts</a>
+                </div>
+            </div>
+
+            <div class="h2">
+                <span>© 2026 JIHC Canteen</span>
+                <span>Made for our college community</span>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
